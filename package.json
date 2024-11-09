@@ -1,12 +1,12 @@
 {
   "name": "vscode-java-debugx",
   "displayName": "Java DebugX",
-  "description": "An enhanced Java debugging experience for Visual Studio Code with advanced macro recording and playback capabilities. Supports step-in, step-out, breakpoints, and customizable debugging sessions in JSON format.",
+  "description": "Java DebugX enhances Java debugging in Visual Studio Code by providing advanced features such as macro recording, runtime insights, and dynamic method invocation.",
   "author": {
     "name": "Soumya Prasad Rana",
     "email": "soumyaprasad.rana@gmail.com"
   },
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "soumyaprasadrana",
   "icon": "vscode-java-debugx.png",
   "engines": {
