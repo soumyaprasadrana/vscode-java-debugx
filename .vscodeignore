@@ -1,0 +1,10 @@
+src/**            
+tests/**          
+node_modules/**   
+*.ts              
+.vscode/**        
+tsconfig.json     
+.eslintrc.json    
+.vscodeignore     
+vscode-java-debugx-ext-bridge/**
+.settings/**

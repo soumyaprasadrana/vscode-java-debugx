@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+      "target": "es2020",                    
+      "module": "commonjs",                  
+      "outDir": "./out",                     
+      "rootDir": "./src",    
+      "lib": ["es2020"],                
+      "strict": true,                         
+      "esModuleInterop": true,
+      "sourceMap": true,                 
+      "skipLibCheck": true,                   
+      "forceConsistentCasingInFileNames": true 
+    },
+    "include": ["src/**/*"],                 // Include all TypeScript files in the src directory
+    "exclude": ["node_modules", "**/*.spec.ts"] // Exclude node_modules and test files
+  }
+  

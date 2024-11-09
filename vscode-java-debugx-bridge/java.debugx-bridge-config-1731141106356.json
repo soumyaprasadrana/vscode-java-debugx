@@ -1,0 +1,21 @@
+{
+  "$schema": "./java.debugx-bridge-config-schema.json",
+  "name": "Java DebugX Bridge Config",
+  "type": "java",
+  "instance": "com.debugx.bridge.VsCodeDebugxBridge",
+  "commands": [
+    {
+      "title": "Get Object Properties",
+      "command": "objectProperties",
+      "responseid": "props",
+      "args": [
+        "this"
+      ],
+      "autotrigger": true,
+      "events": {
+        "stackFrameChanged": true
+      },
+      "hideonerror": true
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+    "java.trace.server": "messages",
+    "java.autobuild.enabled": true,
+    "java.dependency.refreshDelay": 2000,
+    "java.debug.settings.debugSupportOnDecompiledSource": "off",
+    "files.watcherExclude": {
+            "**/.git/objects/**": true,
+            "**/.git/subtree-cache/**": true,
+            "**/node_modules/*/**": true
+        },
+    "redhat.telemetry.enabled":false,
+    "java.settings.url": ".settings/org.eclipse.jdt.core.prefs",
+    "java.debug.settings.onBuildFailureProceed": true,
+
+}

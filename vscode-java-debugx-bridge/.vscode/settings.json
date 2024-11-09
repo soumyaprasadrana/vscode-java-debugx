@@ -1,0 +1,8 @@
+{
+    "java.project.sourcePaths": ["src"],
+    "java.project.outputPath": "bin",
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar"
+    ],
+    "java.debugx.bridgeConfigPath": "C:\\Users\\Soumya\\Desktop\\VSCode-Extension Open Source\\vscode-java-debugx\\vscode-java-debugx-bridge\\java.debugx-bridge-config-1731141106356.json"
+}

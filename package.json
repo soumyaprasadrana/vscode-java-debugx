@@ -1,0 +1,204 @@
+{
+  "name": "vscode-java-debugx",
+  "displayName": "Java DebugX",
+  "description": "An enhanced Java debugging experience for Visual Studio Code with advanced macro recording and playback capabilities. Supports step-in, step-out, breakpoints, and customizable debugging sessions in JSON format.",
+  "author": {
+    "name": "Soumya Prasad Rana",
+    "email": "soumyaprasad.rana@gmail.com"
+  },
+  "version": "0.0.1",
+  "publisher": "soumyaprasadrana",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/soumyaprasadrana/vscode-java-debugx.git"
+  },
+  "bugs": {
+    "url": "https://github.com/soumyaprasadrana/vscode-java-debugx/issues"
+  },
+  "homepage": "https://github.com/soumyaprasadrana/vscode-java-debugx/blob/main/README.md",
+  "scripts": {
+    "tsc-build": "tsc",
+    "watch": "tsc --watch",
+    "es-build": "node build.js",
+    "package": "vsce package",
+    "vscode:prepublish": "npm run build-prod",
+    "build-prod":"rm -rf ./out && npm run es-build && npm run package"
+  },
+  "categories": [
+    "Debuggers",
+    "Programming Languages",
+    "Other"
+  ],
+  "keywords": [
+    "java",
+    "debug",
+    "debugging",
+    "debugger"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "java.debugx.searchExternalFiles",
+        "title": "Search External Files",
+        "category": "JavaDebugX"
+      },
+      {
+        "command": "java.debugx.bridge.debugInsights",
+        "title": "Debug Insights",
+        "category": "JavaDebugX"
+      },
+      {
+        "command": "java.debugx.bridge.clearInsights",
+        "title": "Reset Debug Insights",
+        "icon": "$(clear-all)",
+        "category": "JavaDebugX"
+      },
+      {
+        "command": "java.debugx.bridge.generateBridgeConfig",
+        "title": "Generate Sample Bridge Config",
+        "category": "JavaDebugX"
+      },
+      {
+        "command": "java.debugx.macro.startRecording",
+        "title": "Start Macro Recording",
+        "category": "JavaDebugX",
+        "icon": "$(record)"
+      },
+      {
+        "command": "java.debugx.macro.stopRecording",
+        "title": "Stop Macro Recording",
+        "category": "JavaDebugX",
+        "icon": "$(stop-circle)"
+      },
+      {
+        "command": "java.debugx.macro.playRecording",
+        "title": "Play Macro Recording",
+        "category": "JavaDebugX",
+        "icon": "$(debug-start)"
+      },
+      {
+        "command": "java.debugx.macro.pauseMacroPlay",
+        "title": "Pause Macro Execution",
+        "category": "JavaDebugX",
+        "icon": "$(debug-pause)"
+      },
+      {
+        "command": "java.debugx.macro.resumeMacroPlay",
+        "title": "Resume Macro Execution",
+        "category": "JavaDebugX",
+        "icon": "$(debug-continue)"
+      },
+      {
+        "command": "java.debugx.macro.stopMacroPlay",
+        "title": "Stop Macro Execution",
+        "category": "JavaDebugX",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "java.debugx.output.showLogs",
+        "title": "Show extension output logs",
+        "icon": "$(debug-start)",
+        "category": "JavaDebugX"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "JavaDebugX",
+      "properties": {
+        "java.debugx.filePatterns": {
+          "type": "array",
+          "default": [
+            "*.java",
+            "*.js",
+            "*.dbc",
+            "*.xml"
+          ],
+          "description": "File patterns to include when indexing external files."
+        },
+        "java.debugx.externalFolder": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the external folder to index."
+        },
+        "java.debugx.macro.stepDelayInSeconds": {
+          "type": "integer",
+          "default": 2,
+          "description": "Path to the external folder to index."
+        },
+        "java.debugx.bridgeConfigPath": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to the bridge configuration file."
+        }
+      }
+    },
+    "views": {
+      "debug": [
+        {
+          "id": "java.debugx.viewBridgeResponses",
+          "name": "Insights",
+          "contextualTitle": "Debug Insights"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "java.debugx.bridge.clearInsights",
+          "when": "view == 'java.debugx.viewBridgeResponses' && inDebugMode",
+          "group": "navigation"
+        },
+        {
+          "command": "java.debugx.macro.startRecording",
+          "when": "view == 'workbench.debug.callStackView' && inDebugMode && !java.debugx.macro.isPlaying && !java.debugx.macro.isRecording",
+          "group": "navigation"
+        },
+        {
+          "command": "java.debugx.macro.stopRecording",
+          "when": "view == 'workbench.debug.callStackView' && inDebugMode && java.debugx.macro.isRecording",
+          "group": "navigation"
+        },
+        {
+          "command": "java.debugx.macro.pauseMacroPlay",
+          "when": "view == 'workbench.debug.callStackView' && inDebugMode && java.debugx.macro.isPlaying && !java.debugx.macro.isPaused",
+          "group": "navigation"
+        },
+        {
+          "command": "java.debugx.macro.resumeMacroPlay",
+          "when": "view == 'workbench.debug.callStackView' && inDebugMode && java.debugx.macro.isPlaying && java.debugx.macro.isPaused",
+          "group": "navigation"
+        },
+        {
+          "command": "java.debugx.macro.stopMacroPlay",
+          "when": "view == 'workbench.debug.callStackView' && inDebugMode && java.debugx.macro.isPlaying && java.debugx.macro.isPaused",
+          "group": "navigation"
+        }
+        
+      ]
+    }
+  },
+  "activationEvents": [
+    "onFolderOpen",
+    "onStartupFinished",
+    "onLanguage:java",
+    "onDebugInitialConfigurations",
+    "onDebugResolve:java",
+    "onCommand: java.debugx.macro.startRecording",
+    "onCommand: java.debugx.macro.stopRecording"
+  ],
+  "main": "./out/extension.js",
+  "devDependencies": {
+    "@types/minimatch": "^5.1.2",
+    "@types/node": "^22.7.9",
+    "@types/vscode": "^1.60.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "minimatch": "^10.0.1"
+  }
+}

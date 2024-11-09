@@ -1,0 +1,48 @@
+name: Publish VS Code Extension on Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js (required for vsce)
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'  # specify the Node.js version compatible with your project
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Step 4: Package and publish the extension using vsce
+      - name: Publish Extension
+        env:
+          VSCE_TOKEN: ${{ secrets.VSCE_TOKEN }}
+        run: |
+          npm install -g @vscode/vsce
+          vsce package
+          vsce publish || exit 1  # Fail the workflow if publish fails
+
+      # Step 5: Update Release Notes (optional)
+      - name: Update release to published
+        if: success()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { context, github } = require('@actions/github');
+            await github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: context.payload.release.id,
+              draft: false,   # Make it a published release only if the workflow succeeds
+              prerelease: false
+            });
