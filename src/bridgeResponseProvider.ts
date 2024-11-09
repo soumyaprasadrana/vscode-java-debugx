@@ -1,4 +1,10 @@
 import * as vscode from 'vscode';
+// Copyright (c) 2024 Soumya Prasad Rana
+// 
+// Licensed under the MIT License. See the LICENSE file in the project root for license information.
+//
+// Author: Soumya Prasad Rana
+// Email: soumyaprasad.rana@gmail.com
 
 // Represents a single response entry in the tree view with added styling
 class BridgeResponseItem extends vscode.TreeItem {
@@ -8,10 +14,10 @@ class BridgeResponseItem extends vscode.TreeItem {
         public readonly collapsibleState: vscode.TreeItemCollapsibleState
     ) {
         super(label, collapsibleState);
-        
+
         // Set description with styled value representation
         this.description = this.getFormattedDescription(value);
-        
+
         // Dynamically assign icon based on value type
         this.iconPath = this.getIcon(value);
     }
@@ -82,7 +88,7 @@ export class BridgeResponseProvider implements vscode.TreeDataProvider<BridgeRes
         this._onDidChangeTreeData.fire(undefined);
     }
 
-    public getResponsesCopy() : Map<string,any>{
+    public getResponsesCopy(): Map<string, any> {
         return new Map(this.responses);
     }
 
@@ -91,7 +97,7 @@ export class BridgeResponseProvider implements vscode.TreeDataProvider<BridgeRes
         this._onDidChangeTreeData.fire(undefined);
     }
 
-    public remove(key:string){
+    public remove(key: string) {
         this.responses.delete(key);
     }
 

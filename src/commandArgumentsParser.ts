@@ -1,3 +1,9 @@
+// Copyright (c) 2024 Soumya Prasad Rana
+// 
+// Licensed under the MIT License. See the LICENSE file in the project root for license information.
+//
+// Author: Soumya Prasad Rana
+// Email: soumyaprasad.rana@gmail.com
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -6,7 +12,7 @@ import { DebugInfoStore, debugSessionEval } from './handleGetDebugInsights';
 export class CommandArgumentsParser {
     private workspaceFolder: string;
     private debugInfoStore: DebugInfoStore;
-    private persistValues:Map<String,any> = new Map<String,any>();
+    private persistValues: Map<String, any> = new Map<String, any>();
 
     constructor(debugInfoStore: DebugInfoStore) {
         // Get the first workspace folder or set an empty string if no workspace is open
@@ -31,40 +37,40 @@ export class CommandArgumentsParser {
                 ? filePath
                 : path.resolve(this.workspaceFolder, filePath);
 
-            return `"${ (await this.readFileContent(resolvedPath)).replace(/"/g, '\\"')}"`;
+            return `"${(await this.readFileContent(resolvedPath)).replace(/"/g, '\\"')}"`;
         }
         if (arg.startsWith('$persist:')) {
             let evalCommand = arg.substring('$persist:'.length);
-            if(this.persistValues.has(evalCommand))
+            if (this.persistValues.has(evalCommand))
                 return `${this.persistValues.get(evalCommand)}`
-            else{
-                if(this.debugInfoStore.hasActiveDebugInfo()){
+            else {
+                if (this.debugInfoStore.hasActiveDebugInfo()) {
                     const stackFrame = this.debugInfoStore.getActiveDebugInfo().stackFrame;
-                    if(stackFrame == null){
+                    if (stackFrame == null) {
                         return evalCommand; //let expression ebaluated at command execution runtime
                     }
-                    const evalRes = await debugSessionEval(stackFrame.session,stackFrame,evalCommand);
-                    if(!evalRes){
+                    const evalRes = await debugSessionEval(stackFrame.session, stackFrame, evalCommand);
+                    if (!evalRes) {
                         return evalCommand;
                     }
-                    if(evalRes.startsWith("{")){
+                    if (evalRes.startsWith("{")) {
                         const evalResObj = JSON.parse(evalRes);
-                        if(evalResObj.status && evalResObj.status=="evalerror"){
+                        if (evalResObj.status && evalResObj.status == "evalerror") {
                             return evalCommand;
-                        }else{
-                            this.persistValues.set(evalCommand,evalRes);
+                        } else {
+                            this.persistValues.set(evalCommand, evalRes);
                             return evalRes;
                         }
-                    }else{
-                        this.persistValues.set(evalCommand,evalRes)
+                    } else {
+                        this.persistValues.set(evalCommand, evalRes)
                         return evalRes;
                     }
-                }else{
+                } else {
                     return evalCommand;
                 }
-                
+
             }
-                
+
         }
 
         // If no function detected, return the argument as-is
@@ -75,7 +81,7 @@ export class CommandArgumentsParser {
         try {
             // Read file contents as a string
             return fs.promises.readFile(filePath, 'utf-8');
-        } catch (error:any) {
+        } catch (error: any) {
             vscode.window.showErrorMessage(`Error reading file at ${filePath}: ${error.message}`);
             return ''; // Return an empty string if file reading fails
         }

@@ -1,3 +1,10 @@
+
+// Copyright (c) 2024 Soumya Prasad Rana
+// 
+// Licensed under the MIT License. See the LICENSE file in the project root for license information.
+//
+// Author: Soumya Prasad Rana
+// Email: soumyaprasad.rana@gmail.com
 import { BridgeConfigManager, CommandConfig } from './bridgeConfig'; // Import your BridgeConfigManager
 import * as vscode from 'vscode';
 import { BridgeResponseProvider } from './bridgeResponseProvider';

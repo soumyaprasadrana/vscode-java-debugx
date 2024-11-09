@@ -48,7 +48,9 @@ To install the **Java DebugX** extension in Visual Studio Code:
 3. Search for **Java DebugX**.
 4. Click **Install**.
 
-Alternatively, you can install it directly from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=soumyaprasadrana.vscode-java-debugx).
+Here's the updated section with the Open VSX URL included:
+
+> Alternatively, you can install it directly from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=soumyaprasadrana.vscode-java-debugx) or from [Open VSX](https://open-vsx.org/extension/soumyaprasadrana/vscode-java-debugx).
 
 ## Getting Started
 
@@ -58,14 +60,15 @@ Once installed, the extension is activated when a Java project is opened. You ca
 
 - **Start Macro Recording**: Begin recording your debugging session. This will capture step-ins, step-outs, and breakpoints.
 - **Stop Macro Recording**: Stop recording and save the session data.
+![MacroRecActions](/media/vscode-java-debugx-macro-start-stop.gif)
 - **Play Macro Recording**: Re-execute the recorded session.
 - **Pause/Resume/Stop Macro Playback**: Pause,resume or stop the playback of your recorded debugging session.
+![MacroRecPlayActions](/media/vscode-java-debugx-play-macro-action-buttons.gif)
 - **Generate Sample Bridge Config**: Generate a sample configuration file to set up your custom bridge and define commands.
 - **Debug Insights**: View detailed insights from bridge configuration into your debugging session through a dedicated panel.
 
 You can access these commands via the **Command Palette** (`Ctrl+Shift+P`), or find them in the **JavaDebugX** menu.
 
-*You can add screenshots or GIFs of key actions here to guide users through the workflow.*
 
 ## Configuration
 
@@ -84,8 +87,6 @@ You can access and modify these settings in the **Settings** tab or directly in 
 ![DebugInsightView](/media/vscode-java-debugx-bridge-insights.gif)
 
 - **Debug Toolbar**: Commands for controlling the macro recording and playback are available in the debug toolbar.
-
-*You can add a screenshot or GIF of the Insights view here.*
 
 ## Example Usage
 

@@ -1,3 +1,9 @@
+// Copyright (c) 2024 Soumya Prasad Rana
+// 
+// Licensed under the MIT License. See the LICENSE file in the project root for license information.
+//
+// Author: Soumya Prasad Rana
+// Email: soumyaprasad.rana@gmail.com
 import * as vscode from 'vscode';
 
 export class StatusBarProvider {
@@ -6,7 +12,7 @@ export class StatusBarProvider {
     // Initialize the status bar item for the extension name
     public static initialize(extensionName: string): void {
         this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 1);
-        this.statusBarItem.text = `$(tools) ${extensionName}`;
+        this.statusBarItem.text = `$(callstack-view-session) ${extensionName}`;
         this.statusBarItem.tooltip = `${extensionName} is active`;
         this.statusBarItem.command = `java.debugx.output.showLogs`;
         this.statusBarItem.show();

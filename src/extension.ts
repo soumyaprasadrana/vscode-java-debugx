@@ -1,3 +1,9 @@
+// Copyright (c) 2024 Soumya Prasad Rana
+// 
+// Licensed under the MIT License. See the LICENSE file in the project root for license information.
+//
+// Author: Soumya Prasad Rana
+// Email: soumyaprasad.rana@gmail.com
 import * as vscode from 'vscode';
 import { searchExternalFiles } from './externalFileSearch';
 import { BridgeResponseProvider } from './bridgeResponseProvider';
