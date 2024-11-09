@@ -1,9 +1,8 @@
 name: Publish VS Code Extension on Release
 
 on:
-  push:
-    branches:
-      - dev
+  release:
+    types: [published]
 
 jobs:
   publish:
@@ -29,16 +28,3 @@ jobs:
           pat: ${{ secrets.VSCE_TOKEN }}
           registryUrl: https://marketplace.visualstudio.com
           extensionFile: ${{ steps.publishToOpenVSX.outputs.vsixPath }}
-      - name: Update release to published
-        if: success()
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const { context, github } = require('@actions/github');
-            await github.rest.repos.updateRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              release_id: context.payload.release.id,
-              draft: false,  # Make it a published release only if the workflow succeeds
-              prerelease: false
-            });

@@ -1,3 +1,9 @@
+// Copyright (c) 2024 Soumya Prasad Rana
+// 
+// Licensed under the MIT License. See the LICENSE file in the project root for license information.
+//
+// Author: Soumya Prasad Rana
+// Email: soumyaprasad.rana@gmail.com
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import { Logger } from './logger';
@@ -65,7 +71,7 @@ export class DebugSessionsTracker implements vscode.DebugAdapterTracker {
             Logger.log(`Unable to set macro start index due to no active session found`);
             return false;
         }
-        if(this.activeSession.type != 'java'){
+        if (this.activeSession.type != 'java') {
             Logger.logError(`Currently, Debug Macro session recordings are supported only for Java debug sessions.`);
             return false;
         }
@@ -255,10 +261,10 @@ export class DebugSessionsTracker implements vscode.DebugAdapterTracker {
                             const breakpoints = eventMessage.arguments?.breakpoints || [];
                             let bpLines = '';
                             for (const bp of breakpoints) {
-                                bpLines += bp.line+" ";
+                                bpLines += bp.line + " ";
                                 sessionData.breakpoints.push({ file: sourceFile, line: bp.line, method: '' });
-                             }
-                             sessionData.events.push({ event: eventMessage, parsedMessage: `Breakpoint set at ${sourceFile}:${bpLines}` });
+                            }
+                            sessionData.events.push({ event: eventMessage, parsedMessage: `Breakpoint set at ${sourceFile}:${bpLines}` });
 
                         } else if (['next', 'stepIn', 'stepOut', 'continue'].includes(eventMessage.command)) {
                             sessionData.events.push({ event: eventMessage, parsedMessage: `Step command issued: ${eventMessage.command}` });
@@ -296,20 +302,20 @@ export class DebugSessionsTracker implements vscode.DebugAdapterTracker {
                                         })
                                     } else {
                                         const needToProcessBreakpoints = this.getBreakpointSyncList(sessionData.events);
-                                        if(needToProcessBreakpoints.length>0 && (!lastSetBreakPointProcessedEvent || (lastSetBreakPointProcessedEvent && lastSetBreakPointProcessedEvent != needToProcessBreakpoints[needToProcessBreakpoints.length-1]))){
+                                        if (needToProcessBreakpoints.length > 0 && (!lastSetBreakPointProcessedEvent || (lastSetBreakPointProcessedEvent && lastSetBreakPointProcessedEvent != needToProcessBreakpoints[needToProcessBreakpoints.length - 1]))) {
                                             sessionData.steps.push({
                                                 ...currentFrame,
                                                 prevEvent: lastEvent, // Attach the last event that occurred before this step
-                                                breakpoints:needToProcessBreakpoints
+                                                breakpoints: needToProcessBreakpoints
                                             });
                                             lastSetBreakPointProcessedEvent = needToProcessBreakpoints;
-                                        }else{
+                                        } else {
                                             sessionData.steps.push({
                                                 ...currentFrame,
                                                 prevEvent: lastEvent // Attach the last event that occurred before this step
                                             });
                                         }
-                                        
+
                                     }
 
 
@@ -379,89 +385,89 @@ export class DebugSessionsTracker implements vscode.DebugAdapterTracker {
         return { event: 'undefined', parsedMessage: 'No previous event' }; // Fallback if no relevant event is found
     }
 
-  /**
- * Compares breakpoint events before and after the last stack trace retrieve
- * and returns a list of changes to sync breakpoints.
- * @param events - Array of events containing debug operation data.
- * @returns An array of objects representing breakpoint additions or removals.
- */
-private getBreakpointSyncList(events: { event: any; parsedMessage: string }[]): any[] {
-    // Step 1: Find the last "Stack trace retrieved" index
-    let lastStackTraceIndex = -1;
-    for (let i = events.length - 1; i >= 0; i--) {
-        if (events[i].parsedMessage.includes('Stack trace retrieved')) {
-            lastStackTraceIndex = i;
-            break;
+    /**
+   * Compares breakpoint events before and after the last stack trace retrieve
+   * and returns a list of changes to sync breakpoints.
+   * @param events - Array of events containing debug operation data.
+   * @returns An array of objects representing breakpoint additions or removals.
+   */
+    private getBreakpointSyncList(events: { event: any; parsedMessage: string }[]): any[] {
+        // Step 1: Find the last "Stack trace retrieved" index
+        let lastStackTraceIndex = -1;
+        for (let i = events.length - 1; i >= 0; i--) {
+            if (events[i].parsedMessage.includes('Stack trace retrieved')) {
+                lastStackTraceIndex = i;
+                break;
+            }
         }
-    }
 
-    if (lastStackTraceIndex === -1) {
-        // No stack trace events found
-        return [];
-    }
+        if (lastStackTraceIndex === -1) {
+            // No stack trace events found
+            return [];
+        }
 
-    // Step 2: Collect relevant setBreakpoints events before the last stack trace index
-    const breakpointEventsMap: Record<string, any> = {};
-    for (let i = lastStackTraceIndex - 1; i >= 0; i--) {
-        const event = events[i];
-        if (event.event.command === "setBreakpoints" && event.event.arguments.source) {
-            const filePath = event.event.arguments.source.path;
+        // Step 2: Collect relevant setBreakpoints events before the last stack trace index
+        const breakpointEventsMap: Record<string, any> = {};
+        for (let i = lastStackTraceIndex - 1; i >= 0; i--) {
+            const event = events[i];
+            if (event.event.command === "setBreakpoints" && event.event.arguments.source) {
+                const filePath = event.event.arguments.source.path;
 
-            // Store only the latest setBreakpoints event per file
+                // Store only the latest setBreakpoints event per file
+                if (!breakpointEventsMap[filePath]) {
+                    breakpointEventsMap[filePath] = event;
+                }
+            }
+        }
+
+        // Step 3: Extract the unique breakpoint events from the map
+        const oldBreakpoints = Object.values(breakpointEventsMap);
+
+        // Step 4: Collect `setBreakpoints` events after the last stack trace for new data
+        const newBreakpoints: Record<string, any> = {};
+        for (let i = lastStackTraceIndex + 1; i < events.length; i++) {
+            const event = events[i];
+            if (event.event.command === "setBreakpoints" && event.event.arguments.source) {
+                const filePath = event.event.arguments.source.path;
+                newBreakpoints[filePath] = event; // Latest occurrence for each file
+            }
+        }
+
+        const syncList: any[] = [];
+
+        // Step 5: Compare the old and new breakpoints by file path
+        for (const oldEvent of oldBreakpoints) {
+            const filePath = oldEvent.event.arguments.source.path;
+            const oldLines = oldEvent.event.arguments.lines;
+
+            if (newBreakpoints[filePath]) {
+                const newLines = newBreakpoints[filePath].event.arguments.lines;
+                const linesDiffer = oldLines.length !== newLines.length ||
+                    oldLines.some((line: any, index: any) => line !== newLines[index]);
+
+                if (linesDiffer) {
+                    // Update required for this file
+                    syncList.push({ action: "update", event: newBreakpoints[filePath] });
+                }
+            } else {
+                // File missing in new data, mark all breakpoints for removal
+                syncList.push({ action: "remove", event: oldEvent });
+            }
+        }
+
+        // Step 6: Identify any new files in the new data segment
+        for (const filePath in newBreakpoints) {
             if (!breakpointEventsMap[filePath]) {
-                breakpointEventsMap[filePath] = event;
+                // New file, mark breakpoints as additions
+                syncList.push({ action: "add", event: newBreakpoints[filePath] });
             }
         }
+
+        return syncList;
     }
 
-    // Step 3: Extract the unique breakpoint events from the map
-    const oldBreakpoints = Object.values(breakpointEventsMap);
-
-    // Step 4: Collect `setBreakpoints` events after the last stack trace for new data
-    const newBreakpoints: Record<string, any> = {};
-    for (let i = lastStackTraceIndex + 1; i < events.length; i++) {
-        const event = events[i];
-        if (event.event.command === "setBreakpoints" && event.event.arguments.source) {
-            const filePath = event.event.arguments.source.path;
-            newBreakpoints[filePath] = event; // Latest occurrence for each file
-        }
-    }
-
-    const syncList: any[] = [];
-
-    // Step 5: Compare the old and new breakpoints by file path
-    for (const oldEvent of oldBreakpoints) {
-        const filePath = oldEvent.event.arguments.source.path;
-        const oldLines = oldEvent.event.arguments.lines;
-
-        if (newBreakpoints[filePath]) {
-            const newLines = newBreakpoints[filePath].event.arguments.lines;
-            const linesDiffer = oldLines.length !== newLines.length ||
-                oldLines.some((line:any, index:any) => line !== newLines[index]);
-
-            if (linesDiffer) {
-                // Update required for this file
-                syncList.push({ action: "update", event: newBreakpoints[filePath] });
-            }
-        } else {
-            // File missing in new data, mark all breakpoints for removal
-            syncList.push({ action: "remove", event: oldEvent });
-        }
-    }
-
-    // Step 6: Identify any new files in the new data segment
-    for (const filePath in newBreakpoints) {
-        if (!breakpointEventsMap[filePath]) {
-            // New file, mark breakpoints as additions
-            syncList.push({ action: "add", event: newBreakpoints[filePath] });
-        }
-    }
-
-    return syncList;
-}
 
 
-    
 }
 
 export class DebugSessionsTrackerFactory implements vscode.DebugAdapterTrackerFactory {

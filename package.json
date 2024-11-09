@@ -6,13 +6,13 @@
     "name": "Soumya Prasad Rana",
     "email": "soumyaprasad.rana@gmail.com"
   },
-  "version": "1.0.1",
+  "version": "1.0.2",
   "publisher": "soumyaprasadrana",
   "icon": "vscode-java-debugx.png",
   "engines": {
     "vscode": "^1.60.0"
   },
-  "license": "SEE LICENSE IN LICENSE",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/soumyaprasadrana/vscode-java-debugx.git"

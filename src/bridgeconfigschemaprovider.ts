@@ -1,3 +1,9 @@
+// Copyright (c) 2024 Soumya Prasad Rana
+// 
+// Licensed under the MIT License. See the LICENSE file in the project root for license information.
+//
+// Author: Soumya Prasad Rana
+// Email: soumyaprasad.rana@gmail.com
 export const bridgeConfigSchema = {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Java DebugX Bridge Config",

@@ -1,4 +1,10 @@
-// bridgeConfig.ts
+// Copyright (c) 2024 Soumya Prasad Rana
+// 
+// Licensed under the MIT License. See the LICENSE file in the project root for license information.
+//
+// Author: Soumya Prasad Rana
+// Email: soumyaprasad.rana@gmail.com
+
 import * as fs from 'fs';
 import * as vscode from 'vscode';
 import { Logger } from './logger';
@@ -7,10 +13,10 @@ export interface CommandConfig {
     title: string;
     command: string;
     responseid: string;
-    reponsetype?:string;
+    reponsetype?: string;
     args?: string[];
     autotrigger?: boolean;
-    hideonerror?:boolean;
+    hideonerror?: boolean;
     presentation?: { //not yet implemented
         [key: string]: {
             type: "list" | "tree" | "plain";
@@ -19,8 +25,8 @@ export interface CommandConfig {
     };
     events: Events;       // Configuration for events
     persistOnStackChange?: boolean; // Indicates whether to persist data on stack changes, default: true
-    destructure?:boolean, //whether to de structure the data
-    destructurepath?:string
+    destructure?: boolean, //whether to de structure the data
+    destructurepath?: string
 }
 
 interface Events {
@@ -69,8 +75,8 @@ export class BridgeConfigManager {
             return;
         for (const command of this.config.commands) {
             if (command.autotrigger) {
-                if(!this.config.autoTriggers)
-                    this.config.autoTriggers=[]
+                if (!this.config.autoTriggers)
+                    this.config.autoTriggers = []
                 this.config.autoTriggers.push(command);
             }
         }
