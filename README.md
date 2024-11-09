@@ -12,8 +12,15 @@
 ## Features
 
 - **Macro Recording and Playback**: Record debugging sessions, including step-ins, step-outs, and breakpoints. Play back the recorded sessions at any time.
+ **Recording**
+![JavaDebugXMacroRecording](/media/vscode-java-debugx-macro-recording.gif)
+ **Playback**
+![JavaDebugXMacro](/media/vscode-java-debugx-play-macro.gif)
+
 - **Customizable Bridge Configurations**: Define custom bridge classes and methods to integrate additional debugging insights.
 - **Advanced Debug Insights**: View detailed, real-time debugging information in a dedicated Insights view.
+![DebugInsight](/media/vscode-java-debugx-bridge.gif)
+
 - **Search External Files**: Search and index external files during debugging to improve traceability.
 - **Customizable File Patterns**: Define which files to include when indexing external files.
 
@@ -26,7 +33,7 @@ To install the **Java DebugX** extension in Visual Studio Code:
 
 1. Open **Visual Studio Code**.
 2. Go to the **Extensions** view by clicking on the Extensions icon in the Activity Bar or pressing `Ctrl+Shift+X`.
-3. Search for **Vscode Java DebugX**.
+3. Search for **Java DebugX**.
 4. Click **Install**.
 
 Alternatively, you can install it directly from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=soumyaprasadrana.vscode-java-debugx).
@@ -79,7 +86,11 @@ To generate a sample bridge configuration file:
 
 This will generate a new bridge configuration file in your workspace, which you can modify to create your custom bridge logic.
 
-![DebugInsight](/media/vscode-java-debugx-bridge.gif)
+
+
+## Limitation
+
+The macro recording feature is well-tested when your debug session interacts with only a single thread. However, if you are debugging multiple threads simultaneously, the events will be recorded but playback might not work as expected. We are actively working on improving support for multi-threaded debugging sessions.
 
 ## Development
 
@@ -93,14 +104,7 @@ If you'd like to contribute or develop the extension locally, follow these steps
    ```bash
    npm install
    ```
-3. Build the extension:
-   ```bash
-   npm run build-prod
-   ```
-4. Launch the extension in VS Code with:
-   ```bash
-   npm run watch
-   ```
+3. Launch the extension in VS Code with from debug view
 
 ## License
 

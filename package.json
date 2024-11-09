@@ -6,8 +6,9 @@
     "name": "Soumya Prasad Rana",
     "email": "soumyaprasad.rana@gmail.com"
   },
-  "version": "0.0.1",
+  "version": "1.0.0",
   "publisher": "soumyaprasadrana",
+  "icon": "vscode-java-debugx.png",
   "engines": {
     "vscode": "^1.60.0"
   },
@@ -126,7 +127,7 @@
         },
         "java.debugx.macro.stepDelayInSeconds": {
           "type": "integer",
-          "default": 2,
+          "default": 1,
           "description": "Path to the external folder to index."
         },
         "java.debugx.bridgeConfigPath": {

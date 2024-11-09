@@ -187,7 +187,7 @@ async function playMacro(macro: StackFrame[], macroFilePath: string, debugInfoSt
     let isPaused = ContextProvider.getContextFromWorkspaceState<boolean>('java.debugx.macro.isPaused') ?? false;
 
     const config = vscode.workspace.getConfiguration('java.debugx');
-    const delayTime = config.get<number>('macro.stepDelayInSeconds') ?? 2;
+    const delayTime = config.get<number>('macro.stepDelayInSeconds') ?? 1;
     // Iterate through each step in the macro
     let count = 0;
     while (isPlaying) {
