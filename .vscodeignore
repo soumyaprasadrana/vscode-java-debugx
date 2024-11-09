@@ -6,5 +6,9 @@ node_modules/**
 tsconfig.json     
 .eslintrc.json    
 .vscodeignore     
-vscode-java-debugx-ext-bridge/**
+vscode-java-debugx-bridge/**
 .settings/**
+media/**
+.github/**
+build.js
+.gitignore

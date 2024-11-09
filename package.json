@@ -27,7 +27,7 @@
     "es-build": "node build.js",
     "package": "vsce package",
     "vscode:prepublish": "npm run build-prod",
-    "build-prod":"rm -rf ./out && npm run es-build && npm run package"
+    "build-prod":"npm run es-build"
   },
   "categories": [
     "Debuggers",

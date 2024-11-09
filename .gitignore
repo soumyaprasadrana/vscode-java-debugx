@@ -2,3 +2,4 @@ node_modules/
 out
 classes/
 macros/
+vscode-java-debugx-*

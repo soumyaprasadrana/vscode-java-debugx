@@ -1,7 +1,19 @@
-<h1>
-  <img src="media/vscode-java-debugx.gif" alt="Java DebugX" width="100" style="vertical-align: middle;"/>
-  vscode-java-debugx
-</h1>
+<p align="center">
+  <a href="" rel="noopener">
+ <img width=200px height=200px src="media/vscode-java-debugx.gif" alt="Project logo"></a>
+</p>
+
+<h3 align="center"> <b>Java DebugX</b> </h3>
+
+<div align="center">
+
+[![Status](https://img.shields.io/badge/status-active-success.svg)]()
+[![GitHub Issues](https://img.shields.io/github/issues/soumyaprasadrana/vscode-java-debugx.svg)](https://github.com/soumyaprasadrana/vscode-java-debugx/issues)
+[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/soumyaprasadrana/vscode-java-debugx.svg)](https://github.com/soumyaprasadrana/vscode-java-debugx/pulls)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
+</div>
+
+---
 
 
 ## Overview
