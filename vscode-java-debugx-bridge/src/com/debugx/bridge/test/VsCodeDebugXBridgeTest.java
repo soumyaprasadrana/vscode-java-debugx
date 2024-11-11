@@ -16,7 +16,14 @@ public class VsCodeDebugXBridgeTest {
 
     void exec() {
         try {
-            int i = 0;
+            MyThread thread = new MyThread();
+            thread.start();
+            MyThread2 thread2 = new MyThread2();
+            thread2.start();
+            MyTestClass testClass = new MyTestClass();
+            int c = testClass.abc();
+
+            int i = c;
             int j = 0;
 
             while (true) {
@@ -30,6 +37,8 @@ public class VsCodeDebugXBridgeTest {
             System.out.println("Result = " + res);
             VsCodeDebugXBridgeTest obj = new VsCodeDebugXBridgeTest(5);
             System.out.println("Class Member = " + obj.getClassMem());
+            thread.join();
+            thread2.join();
         } catch (Exception e) {
             e.printStackTrace();
         }

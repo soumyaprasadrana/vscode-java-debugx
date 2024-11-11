@@ -52,6 +52,9 @@ export class DebugSessionsTracker implements vscode.DebugAdapterTracker {
     private currentFrame: any;
     private currentThread: any;
 
+    private debugRequestMap: Map<number, { request: any; response: any }> = new Map();
+
+
     // Singleton implementation
     private constructor(session: vscode.DebugSession) {
         this.setActiveSession(session);
@@ -186,12 +189,29 @@ export class DebugSessionsTracker implements vscode.DebugAdapterTracker {
 
     onWillReceiveMessage(message: any) {
         //console.log("onWillReceiveMessage", message);
+        if (message && message.type && message.type == 'request' && (message.command == 'threads' || message.command == 'evaluate' || message.command == 'variables')) return; //Performance ; We don't need these request for macro processing
+
         this.debugSessionEventTracker.push({ event: "onWillReceiveMessage", eventMessage: message });
+        if (message && message.type && message.type == 'request') {
+            //Store the request into the map
+            this.debugRequestMap.set(message.seq, { request: message, response: null })
+        }
     }
 
     onDidSendMessage?(message: any): void {
         //console.log("onDidSendMessage", message);
+        if (message && message.type && message.type == 'response' && (message.command == 'threads' || message.command == 'evaluate' || message.command == 'variables')) return; //Performance ; We don't need these request for macro processing
+
         this.debugSessionEventTracker.push({ event: "onDidSendMessage", eventMessage: message });
+
+        if (message && message.type && message.type == 'response') {
+            let reqMap = this.debugRequestMap.get(message.request_seq);
+            if (reqMap) {
+                reqMap.response = message;
+                this.debugRequestMap.set(message.request_seq, reqMap);
+            }
+
+        }
 
         if (message.event === 'stopped') {
             this.currentThread = message.body.threadId;
@@ -292,7 +312,7 @@ export class DebugSessionsTracker implements vscode.DebugAdapterTracker {
                                     lastStackFrame.line !== currentFrame.line ||
                                     lastStackFrame.method !== currentFrame.method) {
                                     // Extract the last relevant event for the step
-                                    const lastEvent = this.getLastThreadOperationEvent(sessionData.events);
+                                    const lastEvent = this.getLastThreadOperationEvent(sessionData.events, eventMessage);
 
                                     if (lastStoppedEvent.body.reason == 'breakpoint' && lastEvent.event.command == 'continue') {
                                         const lastSetBreakPointEvent = this.getLastThreadBreakpointOperationEvent(sessionData.events);
@@ -364,11 +384,32 @@ export class DebugSessionsTracker implements vscode.DebugAdapterTracker {
         return sessionData;
     }
 
-    private getLastThreadOperationEvent(events: { event: any; parsedMessage: string }[]): any {
+    private getLastThreadOperationEvent(events: { event: any; parsedMessage: string }[], currentEvent: any): any {
         for (let i = events.length - 1; i >= 0; i--) {
             const event = events[i];
             // Check the parsedMessage for relevant thread operations
             if (event.parsedMessage.includes('Step command issued:')) {
+                if (currentEvent.request_seq) {
+                    const reqResMap = this.debugRequestMap.get(currentEvent.request_seq); // retrieve the reqResMap to validate the thread ID of the current event
+                    if (reqResMap?.request && reqResMap?.request.arguments && reqResMap?.request.arguments.threadId) {
+                        const currentEventThreadId = reqResMap?.request.arguments.threadId;
+                        const prevThreadOpEventThreadId = event?.event.arguments.threadId;
+                        if (currentEventThreadId != prevThreadOpEventThreadId) {
+                            // Mock event to prevent the current event from playing prev event while macro playback
+                            return {
+                                event: {
+                                    command: "multithread-stopped",
+                                    arguments: {
+                                        threadId: currentEventThreadId
+                                    },
+                                    type: "request",
+                                    seq: 191
+                                }, parsedMessage: 'Thread stopped'
+                            } // Thread doesn't match seems the current event is paused by a breakpoint and user's debug session is multithreaded
+                        }
+                    }
+
+                }
                 return event; // Return the last relevant thread operation event
             }
         }
