@@ -182,6 +182,13 @@ async function playMacro(macro: StackFrame[], macroFilePath: string, debugInfoSt
 
     // Validate initial breakpoint location
     const initialStep = macro[0];
+
+    // Reset debugInfoStore MultiThread variables
+    debugInfoStore.resetMultiThreadVars();
+
+    // Check if the macro is multi threaded
+    const isMultiThreadedSession = hasMultipleThreadIds(macro);
+
     if (initialStep.prevEvent.event == 'undefined' && !await validateCurrentPosition(initialStep.file, initialStep.line, debugInfoStore)) {
         throw new Error(`Debug position mismatch at macro start: Expected ${initialStep.file}:${initialStep.line}`);
     } else {
@@ -222,6 +229,72 @@ async function playMacro(macro: StackFrame[], macroFilePath: string, debugInfoSt
 
             const { event: commandToExecute } = step.prevEvent;
             Logger.log(`[macro-step] [${currentStepIndex + 1}]  beforeExecute`);
+            let multiThreadSessionCurrentThread = null;
+
+            if (isMultiThreadedSession) {
+
+                debugInfoStore.setMultiThreadedSession();
+                const hasThreadChangedBetweenFrames = hasThreadChanged(step, macro[currentStepIndex - 1]);
+
+                if ((commandToExecute && commandToExecute.command && commandToExecute.command == 'multithread-stopped')) {
+                    if (step.breakpoints && step.breakpoints.length > 0) {
+                        for (const item of step.breakpoints) {
+                            if (!syncBreakpointsFromMetadata(item.event?.event.arguments)) {
+                                throw new Error(`Playback halted: Unable to sync breakpoints ${JSON.stringify(commandToExecute.arguments.lines)}.`);
+                            }
+                        }
+                        // Current session is a multi threaded session and current step is a multithreaded-stopped event, we have done some breakpoint operation so now we have to wait for the debugger to stop the thread for the current step
+                        await waitForDebuggerStop(debugInfoStore);
+                    }
+
+                }
+
+                if (hasThreadChangedBetweenFrames) {
+                    const debugSession = vscode.debug.activeDebugSession;
+                    if (debugSession) {
+                        // Get all threads for the current session
+                        const response = await debugSession.customRequest('threads');
+                        const threads = response.threads;
+
+                        for (const thread of threads) {
+                            // Get the top stack frame for each stopped thread
+                            const stackResponse = await debugSession.customRequest('stackTrace', {
+                                threadId: thread.id,
+                                startFrame: 0,
+                                levels: 1
+                            });
+
+                            const topFrame = stackResponse.stackFrames[0];
+
+                            // Check if the top frame's file matches the current event's file
+                            if (topFrame?.source?.name === step.file) {
+                                // Set the event current thread Id to the changed thread
+                                multiThreadSessionCurrentThread = thread.id;
+                                break; // Stop searching after finding the first match
+                            }
+                        }
+                    }
+                    if ((commandToExecute && commandToExecute.command && commandToExecute.command == 'multithread-stopped')) {
+                        if (multiThreadSessionCurrentThread == null)
+                            throw new Error(`Playback halted: Unable to find stopped thread for current step.`);
+                        else
+                            Logger.log(`[macro-step] [${currentStepIndex + 1}] [validated] Thread [${multiThreadSessionCurrentThread}] is stopped.`)
+                    } else {
+                        if (multiThreadSessionCurrentThread != null) {
+                            debugInfoStore.setHasThreadChangedBetweenFrames(true);
+                            debugInfoStore.setActiveThreadForMultiThreadSession(multiThreadSessionCurrentThread);
+                        }
+                    }
+
+                } else {
+                    debugInfoStore.setHasThreadChangedBetweenFrames(false);
+                    debugInfoStore.setActiveThreadForMultiThreadSession(null);
+                }
+            }
+            if ((commandToExecute && commandToExecute.command && commandToExecute.command == 'multithread-stopped')) {
+                currentStepIndex++;
+                continue; //skip; doesn't need macro execution for prev event
+            }
 
             try {
                 if (commandToExecute.command === 'setBreakpoints') {
@@ -282,6 +355,25 @@ async function playMacro(macro: StackFrame[], macroFilePath: string, debugInfoSt
     Logger.logInformation(`Macro execution ended.`)
 
 }
+
+function hasMultipleThreadIds(stackFrames: StackFrame[]): boolean {
+    const threadIds = new Set<number>();
+
+    for (const frame of stackFrames) {
+        const threadId = frame.prevEvent?.event?.arguments?.threadId;
+
+        if (threadId !== undefined) {
+            threadIds.add(threadId);
+        }
+
+        if (threadIds.size > 1) {
+            return true; // Found multiple different threadIds
+        }
+    }
+
+    return false; // Only one unique threadId found (or none at all)
+}
+
 function syncBreakpointsFromMetadata(metadata: any) {
     const { source, lines } = metadata;
 
@@ -322,6 +414,26 @@ function syncBreakpointsFromMetadata(metadata: any) {
     }
     return true;
 }
+
+function hasThreadChanged(frame1: StackFrame, frame2: StackFrame): boolean {
+    if (!frame1 || !frame2)
+        return false;
+
+    if (frame2.prevEvent?.event?.command == 'multithread-stopped')
+        return true;
+
+    const threadId1 = frame1.prevEvent?.event?.arguments?.threadId;
+    const threadId2 = frame2.prevEvent?.event?.arguments?.threadId;
+
+    // Check if both thread IDs are present and differ
+    if (threadId1 !== undefined && threadId2 !== undefined) {
+        return threadId1 !== threadId2;
+    }
+
+    // If either thread ID is missing, return false
+    return false;
+}
+
 
 
 async function processException(session: vscode.DebugSession | undefined, threadId: number | undefined, macroFilePath: string, debugInfoStore: DebugInfoStore) {
@@ -479,20 +591,29 @@ function getCurrentLine() {
 
 // Helper function to execute a debug command on the current thread
 async function executeDebugCommand(commandEvent: any, debugInfoStore: DebugInfoStore): Promise<void> {
-    const currentThreadId = debugInfoStore.getActiveDebugInfo().stackFrame?.threadId;
-    const session = debugInfoStore.getActiveDebugInfo().stackFrame?.session;
-    commandEvent.arguments.threadId = currentThreadId;
-    const res = await session?.customRequest(commandEvent.command, commandEvent.arguments);
-    return res;
+    if (!debugInfoStore.isMultiThreaded()) {
+        const currentThreadId = debugInfoStore.getActiveDebugInfo().stackFrame?.threadId;
+        const session = debugInfoStore.getActiveDebugInfo().stackFrame?.session;
+        commandEvent.arguments.threadId = currentThreadId;
+        const res = await session?.customRequest(commandEvent.command, commandEvent.arguments);
+        return res;
+    } else {
+        const currentThreadId = debugInfoStore.getHasThreadChangedBetweenFrames() && debugInfoStore.getThreadIdForMultiThreadedSession() != null ? debugInfoStore.getThreadIdForMultiThreadedSession() : debugInfoStore.getActiveDebugInfo().stackFrame?.threadId;
+        const session = debugInfoStore.getActiveDebugInfo().stackFrame?.session;
+        commandEvent.arguments.threadId = currentThreadId;
+        const res = await session?.customRequest(commandEvent.command, commandEvent.arguments);
+        return res;
+    }
 }
 
 // Helper function to validate the current debugger position
 async function validateCurrentPosition(file: string, line: number, debugInfoStore: DebugInfoStore): Promise<boolean> {
     const currentStackFrameFromStore = debugInfoStore.getActiveDebugInfo().stackFrame;
     const crrentStackFrameFromTracker = DebugSessionsTracker.getActiveTrackerInstance()?.getCurrentFrame();
-    if (crrentStackFrameFromTracker.id != currentStackFrameFromStore?.frameId) {
+    if (!debugInfoStore.isMultiThreaded() && crrentStackFrameFromTracker.id != currentStackFrameFromStore?.frameId) {
         throw new Error(`Unable to verify current stack item,  something went wrong.`);
     }
+    Logger.log(`Validating current position [current-file] ${crrentStackFrameFromTracker.file} [line] ${crrentStackFrameFromTracker.line} against [macro-step-file] ${file} [line] ${line}`)
     return crrentStackFrameFromTracker && crrentStackFrameFromTracker.file === file && crrentStackFrameFromTracker.line === line;
 
 }

@@ -17,6 +17,39 @@ import { ContextProvider } from './vscodeContextProvider';
 export class DebugInfoStore {
     private activeThread: vscode.DebugThread | null = null;
     private activeStackFrame: vscode.DebugStackFrame | null = null;
+    private isMultiThreadedSession: boolean = false;
+    private activeThreadIdForMultiThreadedSession: any = null;
+    private hasThreadChangedBetweenFrames: boolean = false;
+
+    public setMultiThreadedSession() {
+        this.isMultiThreadedSession = true;
+    }
+
+    public setActiveThreadForMultiThreadSession(threadId: any) {
+        this.activeThreadIdForMultiThreadedSession = threadId;
+    }
+
+    public setHasThreadChangedBetweenFrames(status: boolean) {
+        this.hasThreadChangedBetweenFrames = status;
+    }
+
+    public getHasThreadChangedBetweenFrames(): boolean {
+        return this.hasThreadChangedBetweenFrames;
+    }
+
+    public isMultiThreaded(): boolean {
+        return this.isMultiThreadedSession;
+    }
+
+    public resetMultiThreadVars() {
+        this.isMultiThreadedSession = false;
+        this.hasThreadChangedBetweenFrames = false;
+        this.activeThreadIdForMultiThreadedSession = null;
+    }
+
+    public getThreadIdForMultiThreadedSession() {
+        return this.activeThreadIdForMultiThreadedSession;
+    }
 
     // Store the active thread and frame information
     public updateActiveDebugInfo(thread: vscode.DebugThread | null, stackFrame: vscode.DebugStackFrame | null) {

@@ -8,6 +8,7 @@ import * as vscode from 'vscode';
 
 export class StatusBarProvider {
     private static statusBarItem: vscode.StatusBarItem;
+    private static extensionName: string = "JavaDebugX";
 
     // Initialize the status bar item for the extension name
     public static initialize(extensionName: string): void {
@@ -16,6 +17,7 @@ export class StatusBarProvider {
         this.statusBarItem.tooltip = `${extensionName} is active`;
         this.statusBarItem.command = `java.debugx.output.showLogs`;
         this.statusBarItem.show();
+        this.extensionName = extensionName;
     }
 
     public static async showProgress(taskLabel: string, task: () => Promise<void>): Promise<void> {
@@ -23,7 +25,7 @@ export class StatusBarProvider {
         try {
             await task();
         } finally {
-            this.statusBarItem.text = `$(tools) JavaDebugX`; // Reset to default after task completes
+            this.statusBarItem.text = `$(callstack-view-session) ${this.extensionName}`; // Reset to default after task completes
         }
     }
 
